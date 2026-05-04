@@ -1,0 +1,942 @@
+/* ============================================================
+   WhisperBox — ChatPage.css
+   Drop this file next to ChatPage.jsx (e.g. src/pages/ChatPage.css)
+   Import it inside ChatPage.jsx with:  import "./ChatPage.css";
+   ============================================================ */
+
+/* ── Design tokens ─────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --wb-accent:        #6c63ff;
+  --wb-accent-light:  #ede9ff;
+  --wb-accent-dark:   #4b44cc;
+
+  /* Surface */
+  --wb-bg:            #f0f2f5;
+  --wb-sidebar-bg:    #ffffff;
+  --wb-chat-bg:       #eae6df;       /* WhatsApp's warm linen */
+  --wb-panel-bg:      #ffffff;
+
+  /* Text */
+  --wb-text:          #111b21;
+  --wb-text-muted:    #667781;
+  --wb-text-light:    #ffffff;
+
+  /* Bubbles */
+  --wb-bubble-in:     #ffffff;
+  --wb-bubble-out:    #d9fdd3;       /* WhatsApp green-tinted */
+  --wb-bubble-shadow: 0 1px 2px rgba(0,0,0,.13);
+
+  /* UI chrome */
+  --wb-border:        #e9edef;
+  --wb-header-bg:     #ffffff;
+  --wb-composer-bg:   #ffffff;
+
+  /* Spacing & shape */
+  --wb-sidebar-w:     360px;
+  --wb-radius-lg:     18px;
+  --wb-radius-md:     12px;
+  --wb-radius-sm:     8px;
+
+  /* Font */
+  --wb-font: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* ── Reset / base ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Shell ──────────────────────────────────────────────────── */
+.wb-shell {
+  display: flex;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--wb-font);
+  font-size: 15px;
+  color: var(--wb-text);
+  background: var(--wb-bg);
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.wb-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--wb-sidebar-w);
+  min-width: var(--wb-sidebar-w);
+  height: 100%;
+  background: var(--wb-sidebar-bg);
+  border-right: 1px solid var(--wb-border);
+  overflow: hidden;
+  transition: transform .25s ease, min-width .25s ease, width .25s ease;
+  z-index: 10;
+}
+
+/* Sidebar header bar */
+.wb-sidebar__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--wb-header-bg);
+  border-bottom: 1px solid var(--wb-border);
+  position: sticky;
+  top: 0;
+}
+
+.wb-sidebar__title {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wb-sidebar__app-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--wb-text);
+  letter-spacing: -.3px;
+}
+
+.wb-sidebar__username {
+  font-size: 12px;
+  color: var(--wb-text-muted);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wb-sidebar__badge {
+  padding: 8px 16px 4px;
+}
+
+.wb-sidebar__search {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px;
+  min-width: 100%;
+}
+
+/* ── Avatars ────────────────────────────────────────────────── */
+.wb-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+  color: #fff;
+  user-select: none;
+}
+
+.wb-avatar--self      { background: linear-gradient(135deg, var(--wb-accent), var(--wb-accent-dark)); }
+.wb-avatar--recipient { background: linear-gradient(135deg, #06cf9c, #0aab7d); }
+
+/* ── Icon buttons ───────────────────────────────────────────── */
+.wb-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wb-text-muted);
+  transition: background .15s, color .15s;
+  flex-shrink: 0;
+}
+
+.wb-icon-btn svg { width: 20px; height: 20px; }
+.wb-icon-btn:hover { background: var(--wb-bg); color: var(--wb-text); }
+
+.wb-logout-btn:hover { background: #ffe0e0; color: #c0392b; }
+
+/* ── Mobile sidebar toggle ──────────────────────────────────── */
+.wb-sidebar-toggle {
+  display: none;
+  position: fixed;
+  bottom: 90px;
+  left: 16px;
+  z-index: 30;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--wb-accent);
+  color: #fff;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(108,99,255,.4);
+  transition: transform .15s;
+}
+.wb-sidebar-toggle:hover { transform: scale(1.08); }
+.wb-sidebar-toggle svg { width: 20px; height: 20px; }
+
+/* ============================================================
+   CHAT PANEL
+   ============================================================ */
+.wb-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--wb-chat-bg);
+  /* Subtle diagonal dot pattern like WhatsApp web */
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='1' fill='%23c8c0b0' fill-opacity='0.3'/%3E%3C/svg%3E");
+}
+
+/* ── Conversation header ────────────────────────────────────── */
+.wb-chat__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--wb-header-bg);
+  border-bottom: 1px solid var(--wb-border);
+  min-height: 60px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+
+.wb-back-btn { display: none; }
+
+.wb-chat__header-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.wb-chat__header-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--wb-text);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wb-chat__header-sub {
+  font-size: 12px;
+  color: var(--wb-text-muted);
+  margin-top: 2px;
+}
+
+/* Lock pill */
+.wb-enc-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #e8f8f2;
+  color: #1a7a56;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Error bar ──────────────────────────────────────────────── */
+.wb-error-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #fff3cd;
+  border-bottom: 1px solid #ffc107;
+  color: #856404;
+  font-size: 13px;
+}
+
+/* ── Messages area ──────────────────────────────────────────── */
+.wb-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 8%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scroll-behavior: smooth;
+}
+
+/* Loading dots */
+.wb-messages__loading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: auto;
+}
+
+@keyframes wb-pulse {
+  0%, 80%, 100% { transform: scale(.6); opacity: .4; }
+  40%            { transform: scale(1);  opacity: 1;  }
+}
+
+.wb-dot-pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--wb-accent);
+  animation: wb-pulse 1.2s infinite ease-in-out;
+}
+.wb-dot-pulse--2 { animation-delay: .2s; }
+.wb-dot-pulse--3 { animation-delay: .4s; }
+
+/* Empty state */
+.wb-messages__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: auto;
+  text-align: center;
+  color: var(--wb-text-muted);
+}
+
+.wb-messages__empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--wb-accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.wb-messages__empty-icon svg {
+  width: 36px;
+  height: 36px;
+  color: var(--wb-accent);
+  stroke: var(--wb-accent);
+}
+
+.wb-messages__empty p   { font-size: 16px; font-weight: 600; color: var(--wb-text); }
+.wb-messages__empty span { font-size: 13px; }
+
+/* ── Composer ───────────────────────────────────────────────── */
+.wb-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--wb-composer-bg);
+  border-top: 1px solid var(--wb-border);
+  box-shadow: 0 -1px 4px rgba(0,0,0,.04);
+}
+
+.wb-composer__input {
+  flex: 1;
+  resize: none;
+  border: none;
+  outline: none;
+  border-radius: var(--wb-radius-lg);
+  background: var(--wb-bg);
+  padding: 11px 16px;
+  font-family: var(--wb-font);
+  font-size: 15px;
+  color: var(--wb-text);
+  line-height: 1.5;
+  max-height: 140px;
+  overflow-y: auto;
+  transition: background .15s;
+}
+
+.wb-composer__input::placeholder { color: var(--wb-text-muted); }
+.wb-composer__input:focus         { background: #fff; box-shadow: 0 0 0 2px var(--wb-accent-light); }
+
+/* Send button */
+.wb-composer__send {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--wb-accent);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background .15s, transform .1s, box-shadow .15s;
+  box-shadow: 0 2px 8px rgba(108,99,255,.35);
+}
+
+.wb-composer__send svg { width: 20px; height: 20px; }
+.wb-composer__send:hover:not(:disabled) { background: var(--wb-accent-dark); transform: scale(1.06); }
+.wb-composer__send:disabled             { background: #c5c5c5; box-shadow: none; cursor: not-allowed; }
+
+/* Spinner inside send btn */
+@keyframes wb-spin { to { transform: rotate(360deg); } }
+.wb-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: wb-spin .7s linear infinite;
+}
+
+/* ── Empty / no-selection state ─────────────────────────────── */
+.wb-chat__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  text-align: center;
+  padding: 32px;
+  color: var(--wb-text-muted);
+}
+
+.wb-chat__empty-graphic {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 8px;
+  opacity: .85;
+}
+
+.wb-chat__empty h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--wb-text);
+  letter-spacing: -.5px;
+}
+
+.wb-chat__empty p {
+  max-width: 340px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.wb-chat__empty-note {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: #e8f8f2;
+  border-radius: 20px;
+  color: #1a7a56;
+  font-weight: 500;
+}
+
+/* ============================================================
+   MESSAGE BUBBLES
+   (style your MessageBubble component by wrapping in these)
+   ============================================================ */
+
+/* If MessageBubble renders a .wb-bubble wrapper, these apply */
+.wb-bubble-row {
+  display: flex;
+  margin-bottom: 2px;
+}
+
+.wb-bubble-row--out { justify-content: flex-end; }
+.wb-bubble-row--in  { justify-content: flex-start; }
+
+.wb-bubble {
+  max-width: 65%;
+  padding: 8px 12px;
+  border-radius: var(--wb-radius-lg);
+  line-height: 1.5;
+  font-size: 14.5px;
+  box-shadow: var(--wb-bubble-shadow);
+  word-break: break-word;
+  white-space: pre-wrap;
+  position: relative;
+}
+
+.wb-bubble--out {
+  background: var(--wb-bubble-out);
+  border-bottom-right-radius: 4px;
+  color: var(--wb-text);
+}
+
+.wb-bubble--in {
+  background: var(--wb-bubble-in);
+  border-bottom-left-radius: 4px;
+  color: var(--wb-text);
+}
+
+.wb-bubble__time {
+  font-size: 11px;
+  color: var(--wb-text-muted);
+  text-align: right;
+  margin-top: 3px;
+}
+
+/* ============================================================
+   RESPONSIVE — MOBILE
+   ============================================================ */
+@media (max-width: 768px) {
+  .wb-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(0);
+  }
+
+  .wb-sidebar--closed {
+    transform: translateX(-100%);
+  }
+
+  .wb-sidebar-toggle { display: flex; }
+  .wb-back-btn       { display: flex; }
+
+  .wb-messages { padding: 12px 4%; }
+
+  .wb-enc-pill { display: none; }
+}
+
+/* Scrollbar polish (Webkit) */
+.wb-messages::-webkit-scrollbar,
+.wb-sidebar__search::-webkit-scrollbar {
+  width: 5px;
+}
+.wb-messages::-webkit-scrollbar-track,
+.wb-sidebar__search::-webkit-scrollbar-track {
+  background: transparent;
+}
+.wb-messages::-webkit-scrollbar-thumb,
+.wb-sidebar__search::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+/* ============================================================
+   WhisperBox — SecureBadge.css
+   Drop next to SecureBadge.jsx
+   Import: import "./SecureBadge.css";
+   ============================================================ */
+
+/* ── Secure badge ───────────────────────────────────────────── */
+.secure-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #e8f8f2;
+  color: #1a7a56;
+  font-family: var(--wb-font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  user-select: none;
+  cursor: default;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.secure-badge:hover {
+  background: #d2f5e8;
+  box-shadow: 0 0 0 2px rgba(26, 122, 86, 0.15);
+}
+
+/* Lock emoji is already in the JSX — no extra icon styles needed */
+
+/* ============================================================
+   WhisperBox — UserSearch.css
+   Drop next to UserSearch.jsx
+   Import: import "./UserSearch.css";
+   ============================================================ */
+
+/* ── Design tokens (mirrors ChatPage.css) ───────────────────── */
+
+
+/* ── Panel wrapper ──────────────────────────────────────────── */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 16px;
+  font-family: var(--wb-font);
+  color: var(--wb-text);
+}
+
+.panel h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--wb-text);
+  letter-spacing: -0.2px;
+  margin: 0;
+}
+
+/* ── Search row (input + button) ────────────────────────────── */
+.search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-row input {
+  flex: 1;
+  border: 1.5px solid var(--wb-border);
+  border-radius: var(--wb-radius-lg);
+  background: var(--wb-bg);
+  padding: 9px 14px;
+  font-family: var(--wb-font);
+  font-size: 14px;
+  color: var(--wb-text);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.search-row input::placeholder {
+  color: var(--wb-text-muted);
+}
+
+.search-row input:focus {
+  border-color: var(--wb-accent);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px var(--wb-accent-light);
+}
+
+/* Primary action button */
+.primary-btn {
+  padding: 9px 18px;
+  border-radius: var(--wb-radius-lg);
+  border: none;
+  background: var(--wb-accent);
+  color: #ffffff;
+  font-family: var(--wb-font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 12px;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(108, 99, 255, 0.3);
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: var(--wb-accent-dark);
+  transform: scale(1.04);
+  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.4);
+}
+
+.primary-btn:disabled {
+  background: #c5c5c5;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Error message ──────────────────────────────────────────── */
+.error {
+  font-size: 13px;
+  color: #c0392b;
+  background: #ffe0e0;
+  border-radius: var(--wb-radius-sm);
+  padding: 8px 12px;
+  margin: 0;
+}
+
+/* ── User results list ──────────────────────────────────────── */
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+/* Each result row */
+.user-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: var(--wb-radius-md);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--wb-font);
+  transition: background 0.15s;
+}
+
+.user-item:hover {
+  background: var(--wb-accent-light);
+}
+
+.user-item:active {
+  background: #dcd8ff;
+}
+
+.user-item strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--wb-text);
+}
+
+.user-item span {
+  font-size: 12px;
+  color: var(--wb-text-muted);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+}
+
+/* ============================================================
+   WhisperBox — LoginPage.css
+   Drop next to LoginPage.jsx
+   Import: import "./LoginPage.css";
+   ============================================================ */
+
+/* ── Page wrapper ───────────────────────────────────────────── */
+.auth-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wb-bg);
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='1' fill='%23c8c0b0' fill-opacity='0.3'/%3E%3C/svg%3E");
+  font-family: var(--wb-font);
+  padding: 24px 16px;
+}
+
+/* ── Card ───────────────────────────────────────────────────── */
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: var(--wb-radius-md);
+  padding: 40px 36px 36px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Brand lockup at top */
+.auth-card::before {
+  content: "🔒";
+  display: block;
+  font-size: 36px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.auth-card h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--wb-text);
+  letter-spacing: -0.5px;
+  text-align: center;
+  margin: 0;
+}
+
+/* Muted subtitle */
+.muted {
+  font-size: 13px;
+  color: var(--wb-text-muted);
+  text-align: center;
+  margin: 12px 0 12px;
+  line-height: 1.5;
+}
+
+/* ── Form ───────────────────────────────────────────────────── */
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--wb-text);
+}
+
+.form-group input {
+  border: 1.5px solid var(--wb-border);
+  border-radius: var(--wb-radius-md);
+  background: var(--wb-bg);
+  padding: 10px 14px;
+  font-family: var(--wb-font);
+  font-size: 14.5px;
+  color: var(--wb-text);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.form-group input::placeholder {
+  color: var(--wb-text-muted);
+}
+
+.form-group input:focus {
+  border-color: var(--wb-accent);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px var(--wb-accent-light);
+}
+
+/* ── Primary button ─────────────────────────────────────────── */
+.primary-btn {
+  width: 100%;
+  padding: 11px 18px;
+  border-radius: var(--wb-radius-lg);
+  border: none;
+  background: var(--wb-accent);
+  color: var(--wb-text-light);
+  font-family: var(--wb-font);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(108, 99, 255, 0.35);
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: var(--wb-accent-dark);
+  transform: scale(1.02);
+  box-shadow: 0 4px 14px rgba(108, 99, 255, 0.4);
+}
+
+.primary-btn:disabled {
+  background: #c5c5c5;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Link-style button (Register) ───────────────────────────── */
+.link-btn {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: var(--wb-accent);
+  font-family: var(--wb-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  border-radius: var(--wb-radius-sm);
+  transition: background 0.15s, color 0.15s;
+}
+
+.link-btn:hover {
+  background: var(--wb-accent-light);
+  color: var(--wb-accent-dark);
+}
+
+/* ── Encrypted footer note ──────────────────────────────────── */
+.auth-card::after {
+  content: "🔐 End-to-end encrypted";
+  display: block;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1a7a56;
+  background: #e8f8f2;
+  border-radius: 20px;
+  padding: 5px 14px;
+  margin-top: 14px;
+  letter-spacing: 0.2px;
+}
+
+
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 32px 20px 28px;
+  }
+
+  .auth-card h1 {
+    font-size: 21px;
+  }
+}
+
+
+/* Fix UserSearch inside advanced sidebar */
+.wb-sidebar__search {
+  width: 100%;
+  padding: 12px;
+  overflow: visible;
+}
+
+.wb-sidebar__search .panel {
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.wb-sidebar__search .search-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.wb-sidebar__search .search-row input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 44px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  outline: none;
+}
+
+.wb-sidebar__search .search-row input::placeholder {
+  color: #94a3b8;
+}
+
+.wb-sidebar__search .search-row input:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.wb-sidebar__search .search-row .primary-btn {
+  width: auto;
+  min-width: 86px;
+  height: 44px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.wb-sidebar__search .user-list {
+  margin-top: 12px;
+  width: 100%;
+}
+
+.wb-sidebar__search .user-item {
+  width: 100%;
+}

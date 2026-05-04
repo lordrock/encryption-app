@@ -1,0 +1,111 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.auth-page,
+.chat-page {
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.auth-card {
+  width: min(100%, 420px);
+  margin: 48px auto;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.auth-card h1 {
+  margin: 0 0 8px;
+}
+
+.muted {
+  color: #9ca3af;
+}
+
+.form-group {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.form-group label {
+  font-size: 14px;
+  color: #cbd5e1;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  border: 1px solid #334155;
+  background: #020617;
+  color: #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.primary-btn,
+.secondary-btn,
+.danger-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-weight: 700;
+}
+
+.primary-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.secondary-btn {
+  background: #334155;
+  color: white;
+}
+
+.danger-btn {
+  background: #dc2626;
+  color: white;
+}
+
+.link-btn {
+  background: transparent;
+  border: none;
+  color: #60a5fa;
+  padding: 0;
+}
+
+.error {
+  color: #fca5a5;
+  margin-top: 12px;
+}
+
+.success {
+  color: #86efac;
+  margin-top: 12px;
+}
