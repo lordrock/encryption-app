@@ -23,10 +23,15 @@ Build a secure messaging app where:
 - PBKDF2
 - AES-KW
 
+## Git Repo URL
+
+https://github.com/lordrock/encryption-app
+
 ## API Base URL
 
 ```txt
 https://whisperbox.koyeb.app
+
 
 src/
 ├── api/
