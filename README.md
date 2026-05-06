@@ -23,6 +23,10 @@ Build a secure messaging app where:
 - PBKDF2
 - AES-KW
 
+## Live Url
+
+https://encryption-app-three.vercel.app
+
 ## Git Repo URL
 
 https://github.com/lordrock/encryption-app
